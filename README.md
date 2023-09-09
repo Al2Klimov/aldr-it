@@ -68,6 +68,8 @@ Also create a local inventory file reflecting the host, e.g.:
 
 `mx ansible_host=195.201.20.180 ansible_user=aklimov ipv6_addr=2a01:4f8:c2c:7e0d::1`
 
+Check and update the [DNS zone](./playbooks/dns/allianzfreidemrus.de.zone)!
+
 Finally apply the [playbook](./playbook.yml), e.g.:
 
 `ansible-playbook -i inventory.txt playbook.yml`

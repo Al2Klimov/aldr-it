@@ -2,3 +2,4 @@
 - import_playbook: playbooks/python/playbook.yml
 - import_playbook: playbooks/ipv6/playbook.yml
 - import_playbook: playbooks/security/playbook.yml
+- import_playbook: playbooks/dns/playbook.yml

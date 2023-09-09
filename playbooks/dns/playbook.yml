@@ -1,0 +1,58 @@
+---
+- name: Auth. DNS
+  hosts: mx
+  become: true
+  become_method: doas
+  tasks:
+    - name: BIND 9
+      openbsd_pkg:
+        name: isc-bind-9.18.17v3
+
+    - name: /var/named/etc/...
+      loop:
+        - zones.d
+        - keys.d
+        - keys.d/allianzfreidemrus.de
+      file:
+        path: '/var/named/etc/{{ item }}'
+        owner: _bind
+        group: _bind
+        mode: '0700'
+        state: directory
+
+    - name: allianzfreidemrus.de zone
+      copy:
+        dest: /var/named/etc/zones.d/allianzfreidemrus.de.zone
+        owner: _bind
+        group: _bind
+        src: allianzfreidemrus.de.zone
+      register: named_zone
+
+    - name: named.conf
+      copy:
+        dest: /var/named/etc/named.conf
+        src: named.conf
+      register: named_conf
+
+    - name: named-checkconf -t /var/named
+      when: named_conf.changed
+      shell: named-checkconf -t /var/named
+
+    - name: Stop isc_named
+      when: named_conf.changed
+      service:
+        name: isc_named
+        state: stopped
+
+    - name: Start isc_named
+      service:
+        name: isc_named
+        state: started
+        enabled: true
+      register: named_started
+
+    - name: Reload isc_named
+      when: (not named_started.changed) and named_zone.changed
+      service:
+        name: isc_named
+        state: reloaded
