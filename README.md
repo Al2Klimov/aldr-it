@@ -25,8 +25,8 @@ Load OpenBSD 7.3 image, reboot and open the web console to setup OpenBSD.
 * Net: just enter, but "autoconf" for IPv6
 * Simple root password for now (TODO: correct later)
 * sshd: "yes"
-* X window, com0 and user: "no" (TODO: user for SSH?)
-* root ssh login: "p" (no password)
+* X window, com0 and user: "no"
+* root ssh login: "no"
 * Timezone: confirm
 
 ### Partitioning
@@ -52,3 +52,11 @@ Load OpenBSD 7.3 image, reboot and open the web console to setup OpenBSD.
 * Sets location and reboot: confirm
 * Eject ISO image
 * Reboot one last time
+
+## Remote access
+
+In the web console login as root. Create a user for the admin, e.g.:
+
+`adduser -batch aklimov wheel 'Alexander A. Klimov' '*' -group users -v`
+
+Then populate (e.g.) `/home/aklimov/.ssh/authorized_keys`.
