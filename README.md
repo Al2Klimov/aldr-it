@@ -60,3 +60,14 @@ In the web console login as root. Create a user for the admin, e.g.:
 `adduser -batch aklimov wheel 'Alexander A. Klimov' '*' -group users -v`
 
 Then populate (e.g.) `/home/aklimov/.ssh/authorized_keys`.
+
+## Ansible playbook
+
+Create `/etc/doas.conf` filled with (e.g.) `permit nopass aklimov as root`.
+Also create a local inventory file reflecting the host, e.g.:
+
+`mx ansible_host=195.201.20.180 ansible_user=aklimov`
+
+Finally apply the [playbook](./playbook.yml), e.g.:
+
+`ansible-playbook -i inventory.txt playbook.yml`

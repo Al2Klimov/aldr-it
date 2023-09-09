@@ -1,0 +1,16 @@
+---
+- name: Install Python 3
+  hosts: mx
+  become: true
+  become_method: doas
+  gather_facts: no
+  tasks:
+    - name: which python3
+      raw: which python3
+      changed_when: false
+      failed_when: false
+      register: which_python3
+
+    - name: pkg_add python3
+      when: which_python3.rc == 2
+      raw: pkg_add python3
