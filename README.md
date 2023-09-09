@@ -66,7 +66,7 @@ Then populate (e.g.) `/home/aklimov/.ssh/authorized_keys`.
 Create `/etc/doas.conf` filled with (e.g.) `permit nopass aklimov as root`.
 Also create a local inventory file reflecting the host, e.g.:
 
-`mx ansible_host=195.201.20.180 ansible_user=aklimov`
+`mx ansible_host=195.201.20.180 ansible_user=aklimov ipv6_addr=2a01:4f8:c2c:7e0d::1`
 
 Finally apply the [playbook](./playbook.yml), e.g.:
 
