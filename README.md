@@ -23,7 +23,7 @@ Load OpenBSD 7.3 image, reboot and open the web console to setup OpenBSD.
 * Keyboard: "de"
 * Hostname: "mx" (TODO: mail service)
 * Net: just enter, but "autoconf" for IPv6
-* Simple root password for now (TODO: correct later)
+* Simple root password for now
 * sshd: "yes"
 * X window, com0 and user: "no"
 * root ssh login: "no"

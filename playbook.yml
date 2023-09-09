@@ -14,3 +14,13 @@
     - name: pkg_add python3
       when: which_python3.rc == 2
       raw: pkg_add python3
+
+- name: Security
+  hosts: mx
+  become: true
+  become_method: doas
+  tasks:
+    - name: Lock root login
+      user:
+        name: root
+        password: '*************'
