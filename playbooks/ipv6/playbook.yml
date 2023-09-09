@@ -1,0 +1,23 @@
+---
+- name: IPv6
+  hosts: mx
+  become: true
+  become_method: doas
+  tasks:
+    - name: '/etc/hostname.vio0: inet6'
+      lineinfile:
+        path: /etc/hostname.vio0
+        regexp: '^inet6 '
+        line: 'inet6 {{ ipv6_addr }} 64'
+      register: hostname_vio0
+
+    - name: /etc/mygate
+      copy:
+        dest: /etc/mygate
+        content: |
+          fe80::1%vio0
+      register: etc_mygate
+
+    - name: sh /etc/netstart
+      when: hostname_vio0.changed or etc_mygate.changed
+      shell: sh /etc/netstart
