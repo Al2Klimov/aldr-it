@@ -47,3 +47,18 @@
       user:
         name: root
         password: '*************'
+
+    - name: /etc/pf.conf
+      copy:
+        dest: /etc/pf.conf
+        mode: '0600'
+        src: pf.conf
+      register: pf_conf
+
+    - name: pfctl -nvf /etc/pf.conf
+      when: pf_conf.changed
+      shell: pfctl -nvf /etc/pf.conf
+
+    - name: pfctl -f /etc/pf.conf
+      when: pf_conf.changed
+      shell: pfctl -f /etc/pf.conf
