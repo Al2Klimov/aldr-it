@@ -1,0 +1,5 @@
+---
+- import_playbook: ../python/playbook.yml
+- import_playbook: ../ipv6/playbook.yml
+- import_playbook: ../security/playbook.yml
+- import_playbook: ../dns/playbook.yml
