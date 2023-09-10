@@ -81,4 +81,6 @@ Finally apply the [playbook](./playbook.yml):
 2. Delegate allianzfreidemrus.de to the freshly provisioned nameserver (DNSSEC!)
 3. Await the delegation incl. DNSSEC to take effect
    (`dig NS de`, `dig @DE_NS NS allianzfreidemrus.de`, https://dnsviz.net)
-4. Apply everything: `ansible-playbook -i inventory.txt playbook.yml`
+4. While on it: set the VM's rDNS (v4 and v6!) to "mx.allianzfreidemrus.de"
+   and protect the VM
+5. Apply everything: `ansible-playbook -i inventory.txt playbook.yml`
