@@ -4,6 +4,12 @@
   become: true
   become_method: doas
   tasks:
+    - include_tasks: ../../tasks/letsencrypt.yml
+      vars:
+        domain: mx.allianzfreidemrus.de
+        intern: true
+        rcctl: restart smtpd
+
     - name: Install opensmtpd-filter-dnsbl
       openbsd_pkg:
         name: opensmtpd-filter-dnsbl

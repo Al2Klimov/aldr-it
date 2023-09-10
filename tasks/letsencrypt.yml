@@ -1,0 +1,49 @@
+---
+- name: '/etc/nginx/sites.d/{{ domain }}-80.conf'
+  template:
+    dest: '/etc/nginx/sites.d/{{ domain }}-80.conf'
+    src: nginx-80.conf.j2
+  register: sites_d_80_conf
+
+- name: Reload nginx
+  when: sites_d_80_conf.changed
+  service:
+    name: nginx
+    state: reloaded
+
+- name: "/etc/acme-client.conf: Let's Encrypt"
+  blockinfile:
+    path: /etc/acme-client.conf
+    create: true
+    marker: "# {mark} Let's Encrypt"
+    block: |
+      authority letsencrypt {
+        api url "https://acme-v02.api.letsencrypt.org/directory"
+        account key "/etc/acme/letsencrypt-privkey.pem"
+      }
+
+- name: '/etc/acme-client.conf: {{ domain }}'
+  blockinfile:
+    path: /etc/acme-client.conf
+    marker: '# {mark} {{ domain }}'
+    block: |
+      domain {{ domain }} {
+        domain key "/etc/ssl/private/{{ domain }}.key" rsa
+        domain full chain certificate "/etc/ssl/{{ domain }}.fullchain.pem"
+        sign with letsencrypt
+      }
+
+- name: 'acme-client {{ domain }}'
+  shell: 'acme-client {{ domain }}'
+  args:
+    creates: '/etc/ssl/{{ domain }}.fullchain.pem'
+
+- name: '/etc/crontab: acme-client {{ domain }}'
+  blockinfile:
+    path: /etc/crontab
+    mode: '0600'
+    create: true
+    marker: '# {mark} acme-client {{ domain }}'
+    block: >
+      ~ ~ * * 1  root  acme-client {{ domain }}
+      && rcctl {{ rcctl |default('reload nginx') }} |grep -vFe '(ok)'
