@@ -104,6 +104,31 @@
       openbsd_pkg:
         name: opensmtpd-filter-rspamd
 
+    # qdgrey
+
+    - name: Install go
+      openbsd_pkg:
+        name: go
+
+    - name: /usr/local/opensmtpd-filter-qdgrey
+      copy:
+        dest: /usr/local
+        src: ../../subtrees/opensmtpd-filter-qdgrey
+      register: qdgrey_src
+
+    - name: Remove /usr/local/libexec/smtpd/filter-qdgrey
+      when: qdgrey_src.changed
+      file:
+        path: /usr/local/libexec/smtpd/filter-qdgrey
+        state: absent
+
+    - name: go build -o /usr/local/libexec/smtpd/filter-qdgrey
+      shell: go build -o /usr/local/libexec/smtpd/filter-qdgrey .
+      args:
+        chdir: /usr/local/opensmtpd-filter-qdgrey
+        creates: /usr/local/libexec/smtpd/filter-qdgrey
+      register: qdgrey_bin
+
     # SMTP
 
     - name: /etc/mail/mailname
