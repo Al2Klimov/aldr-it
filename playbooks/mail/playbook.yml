@@ -14,6 +14,98 @@
       openbsd_pkg:
         name: opensmtpd-filter-dnsbl
 
+    # Redis
+
+    - name: Install redis
+      openbsd_pkg:
+        name: redis
+
+    - name: '/etc/redis/redis.conf: unixsocket'
+      blockinfile:
+        path: /etc/redis/redis.conf
+        block: |
+          unixsocket /var/run/redis/redis.sock
+          unixsocketperm 770
+      register: redis_conf
+
+    - name: '/etc/redis/redis.conf: port'
+      lineinfile:
+        path: /etc/redis/redis.conf
+        regexp: '^port '
+        line: port 0
+      register: redis_conf_port
+
+    - name: Stop redis
+      when: redis_conf.changed or redis_conf_port.changed
+      service:
+        name: redis
+        state: stopped
+
+    - name: Start redis
+      service:
+        name: redis
+        state: started
+        enabled: true
+
+    # rspamd
+
+    - name: Install rspamd
+      openbsd_pkg:
+        name: rspamd-3.4p2
+
+    - name: Disable /etc/rspamd/local.d/...
+      loop:
+        - greylist.conf
+        - worker-proxy.inc
+        - worker-controller.inc
+      copy:
+        dest: '/etc/rspamd/local.d/{{ item }}'
+        content: enabled = false;
+      register: rspamd_disable
+
+    - name: Invite _rspamd to _redis
+      user:
+        name: _rspamd
+        create_home: false
+        append: true
+        groups:
+          - _redis
+      register: rspamd_group_redis
+
+    - name: /etc/rspamd/local.d/redis.conf
+      copy:
+        dest: /etc/rspamd/local.d/redis.conf
+        content: servers = "/var/run/redis/redis.sock";
+      register: rspamd_redis
+
+    - name: /etc/rspamd/override.d/worker-normal.inc
+      copy:
+        dest: /etc/rspamd/override.d/worker-normal.inc
+        content: bind_socket = "/var/rspamd/worker-normal.sock owner=_smtpd mode=0600";
+      register: rspamd_worker_normal
+
+    - name: Stop rspamd
+      when: >-
+        rspamd_group_redis.changed
+        or rspamd_disable.changed
+        or rspamd_redis.changed
+        or rspamd_worker_normal.changed
+      service:
+        name: rspamd
+        state: stopped
+
+    - name: Start rspamd
+      service:
+        name: rspamd
+        state: started
+        enabled: true
+
+    - name: Install opensmtpd-filter-rspamd
+      openbsd_pkg:
+        name: opensmtpd-filter-rspamd
+
+    # SMTP
+
     - name: /etc/mail/mailname
       copy:
         dest: /etc/mail/mailname
