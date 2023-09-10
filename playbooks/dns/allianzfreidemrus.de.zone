@@ -1,10 +1,16 @@
 $TTL    3600
 
 @   IN  SOA dns4.allianzfreidemrus.de.   it.allianzfreidemrus.de. (
-    2023090901  3600    1800    604800  600)
+    2023091000  3600    1800    604800  600)
 
     NS  dns4.allianzfreidemrus.de.
     NS  dns6.allianzfreidemrus.de.
+
+    MX  10  mx.allianzfreidemrus.de.
+
+
+mx  A       195.201.20.180
+    AAAA    2a01:4f8:c2c:7e0d::1
 
 
 dns4    A       195.201.20.180

@@ -1,0 +1,58 @@
+---
+- name: Mail
+  hosts: mx
+  become: true
+  become_method: doas
+  tasks:
+    - name: Install opensmtpd-filter-dnsbl
+      openbsd_pkg:
+        name: opensmtpd-filter-dnsbl
+
+    - name: /etc/mail/mailname
+      copy:
+        dest: /etc/mail/mailname
+        content: |
+          mx.allianzfreidemrus.de
+      register: mail_mailname
+
+    - name: /etc/mail/vdomains
+      copy:
+        dest: /etc/mail/vdomains
+        content: |
+          allianzfreidemrus.de
+      register: mail_vdomains
+
+    - name: /etc/mail/vusers
+      copy:
+        dest: /etc/mail/vusers
+        content: |
+          it@allianzfreidemrus.de  root
+          postmaster@allianzfreidemrus.de  postmaster
+      register: mail_vusers
+
+    - name: /etc/mail/smtpd.conf
+      copy:
+        dest: /etc/mail/smtpd.conf
+        src: smtpd.conf
+      register: smtpd_conf
+
+    - name: Stop smtpd
+      when: >-
+        mail_mailname.changed
+        or mail_vdomains.changed
+        or mail_vusers.changed
+        or smtpd_conf.changed
+      service:
+        name: smtpd
+        state: stopped
+
+    - name: Start smtpd
+      service:
+        name: smtpd
+        state: started
+
+    - name: Enable smtpd
+      lineinfile:
+        path: /etc/rc.conf.local
+        regexp: '^smtpd_flags='
+        line: smtpd_flags=
