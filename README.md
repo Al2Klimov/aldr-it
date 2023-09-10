@@ -64,16 +64,21 @@ Then populate (e.g.) `/home/aklimov/.ssh/authorized_keys`.
 ## Ansible playbook
 
 Create `/etc/doas.conf` filled with (e.g.) `permit nopass aklimov as root`.
-Also create a local inventory file reflecting the host, e.g.:
 
-`mx ansible_host=195.201.20.180 ansible_user=aklimov ipv6_addr=2a01:4f8:c2c:7e0d::1`
+Check and update [the inventory](./inventory.txt)
+as well as your local `~/.ssh/config` if necessary, e.g.:
+
+```
+Host 195.201.20.180
+  User aklimov
+```
 
 Check and update the [DNS zone](./playbooks/dns/allianzfreidemrus.de.zone)!
 
 Finally apply the [playbook](./playbook.yml):
 
-1. E.g. `ansible-playbook -i inventory.txt playbooks/just-dns/playbook.yml`
+1. `ansible-playbook -i inventory.txt playbooks/just-dns/playbook.yml`
 2. Delegate allianzfreidemrus.de to the freshly provisioned nameserver (DNSSEC!)
 3. Await the delegation incl. DNSSEC to take effect
    (`dig NS de`, `dig @DE_NS NS allianzfreidemrus.de`, https://dnsviz.net)
-4. Apply everything, e.g.: `ansible-playbook -i inventory.txt playbook.yml`
+4. Apply everything: `ansible-playbook -i inventory.txt playbook.yml`
