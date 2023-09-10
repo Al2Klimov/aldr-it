@@ -1,0 +1,50 @@
+---
+- name: WWW
+  hosts: mx
+  become: true
+  become_method: doas
+  tasks:
+    - name: Install nginx
+      openbsd_pkg:
+        name: nginx
+
+    - name: Install py3-cryptography
+      openbsd_pkg:
+        name: py3-cryptography
+
+    - name: Dummy private key
+      openssl_privatekey:
+        path: /etc/ssl/private/snakeoil.key
+
+    - name: Dummy TLS certificate
+      openssl_certificate:
+        path: /etc/ssl/snakeoil.pem
+        privatekey_path: /etc/ssl/private/snakeoil.key
+        provider: selfsigned
+
+    - name: DH params
+      openssl_dhparam:
+        path: /etc/ssl/private/dhparams
+
+    - name: /etc/nginx/sites.d
+      file:
+        path: /etc/nginx/sites.d
+        state: directory
+
+    - name: /etc/nginx/nginx.conf
+      copy:
+        dest: /etc/nginx/nginx.conf
+        src: nginx.conf
+      register: nginx_conf
+
+    - name: Stop nginx
+      when: nginx_conf.changed
+      service:
+        name: nginx
+        state: stopped
+
+    - name: Start nginx
+      service:
+        name: nginx
+        state: started
+        enabled: true
