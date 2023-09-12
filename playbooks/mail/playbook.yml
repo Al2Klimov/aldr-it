@@ -145,13 +145,46 @@
           allianzfreidemrus.de
       register: mail_vdomains
 
+    - name: /etc/mail/rt.d
+      file:
+        path: /etc/mail/rt.d
+        state: directory
+
+    - name: /etc/mail/rt.d/...
+      loop:
+        - action: correspond
+          queue: General
+        - action: comment
+          queue: General
+        - action: correspond
+          queue: IT
+        - action: comment
+          queue: IT
+      copy:
+        dest: '/etc/mail/rt.d/{{ item.action }}-{{ item.queue }}'
+        mode: '0755'
+        content: |
+          #!/bin/ksh
+          exec /usr/local/bin/rt-mailgate --action {{ item.action
+          }} --queue {{ item.queue }} --url http://localhost:8080/
+
     - name: /etc/mail/vusers
       copy:
         dest: /etc/mail/vusers
         content: |
-          it@allianzfreidemrus.de  root
-          postmaster@allianzfreidemrus.de  postmaster
+          info@allianzfreidemrus.de  |/etc/mail/rt.d/correspond-General
+          rtx@allianzfreidemrus.de  |/etc/mail/rt.d/comment-General
+          it@allianzfreidemrus.de  |/etc/mail/rt.d/correspond-IT
+          rtx-it@allianzfreidemrus.de  |/etc/mail/rt.d/comment-IT
+          postmaster@allianzfreidemrus.de  |/etc/mail/rt.d/correspond-IT
       register: mail_vusers
+
+    - name: /etc/mail/aliases
+      blockinfile:
+        path: /etc/mail/aliases
+        block: |
+          root:  |/etc/mail/rt.d/correspond-IT
+      register: mail_aliases
 
     - name: /etc/mail/smtpd.conf
       copy:
@@ -164,6 +197,7 @@
         mail_mailname.changed
         or mail_vdomains.changed
         or mail_vusers.changed
+        or mail_aliases.changed
         or smtpd_conf.changed
       service:
         name: smtpd

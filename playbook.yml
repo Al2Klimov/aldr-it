@@ -2,3 +2,4 @@
 - import_playbook: playbooks/just-dns/playbook.yml
 - import_playbook: playbooks/www/playbook.yml
 - import_playbook: playbooks/mail/playbook.yml
+- import_playbook: playbooks/request-tracker/playbook.yml

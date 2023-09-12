@@ -1,0 +1,60 @@
+---
+- name: Request Tracker
+  hosts: mx
+  become: true
+  become_method: doas
+  tasks:
+    - name: Install mariadb-server
+      openbsd_pkg:
+        name: mariadb-server
+
+    - name: mariadb-install-db
+      shell: mariadb-install-db
+      args:
+        creates: /var/mysql/mysql
+
+    - name: Start mysqld
+      service:
+        name: mysqld
+        state: started
+        enabled: true
+
+    - name: Install Request Tracker
+      openbsd_pkg:
+        name: rt
+
+    - name: /etc/rt/RT_SiteConfig.pm
+      copy:
+        dest: /etc/rt
+        src: RT_SiteConfig.pm
+      register: RT_SiteConfig
+
+    - name: Stop RT
+      when: RT_SiteConfig.changed
+      service:
+        name: rt
+        state: stopped
+      register: rt_stopped
+
+    - name: Start RT
+      when: rt_stopped.changed
+      service:
+        name: rt
+        state: started
+
+    - include_tasks: ../../tasks/letsencrypt.yml
+      vars:
+        domain: tickets.allianzfreidemrus.de
+        port: ':4433'
+
+    - name: /etc/nginx/sites.d/tickets.allianzfreidemrus.de.conf
+      template:
+        dest: /etc/nginx/sites.d/tickets.allianzfreidemrus.de.conf
+        src: nginx.conf
+      register: sites_d_conf
+
+    - name: Reload nginx
+      when: sites_d_conf.changed
+      service:
+        name: nginx
+        state: reloaded

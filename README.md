@@ -84,3 +84,23 @@ Finally apply the [playbook](./playbook.yml):
 4. While on it: set the VM's rDNS (v4 and v6!) to "mx.allianzfreidemrus.de"
    and protect the VM
 5. Apply everything: `ansible-playbook -i inventory.txt playbook.yml`
+
+## Final tasks
+
+Add a .pm file in `/etc/rt/RT_SiteConfig.d/` similar to this:
+
+`Set($DatabasePassword, 'CHANGE ME!');`
+
+Then run:
+
+* `rt-setup-database --action init`
+* `rt-passwd root`
+* `rcctl enable rt`
+* `rcctl start rt`
+
+### Settings in Request Tracker web interface
+
+Create an "IT" queue:
+
+* Reply address: it@allianzfreidemrus.de
+* Comment address: rtx-it@allianzfreidemrus.de
